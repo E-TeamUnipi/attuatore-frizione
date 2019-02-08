@@ -79,10 +79,10 @@ unsigned int map_duration(unsigned int duration)
 inline
 int map_fix(int err)
 { 
-    fix = map(err, -600, 600, -127, 110);
-    if (fix < -127) {
+    err = map(err, -600, 600, -127, 110);
+    if (err < -127) {
         return -127;
-    } else if (fix > 110) {
+    } else if (err > 110) {
         return 110;
     }
     return err;
