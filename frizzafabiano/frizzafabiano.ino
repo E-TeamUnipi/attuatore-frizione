@@ -29,7 +29,7 @@ RoboClaw roboclaw(&serial, 10000);
 #define MAP_POT_MIN 10200
 #define MAP_POT_MAX 10800
 
-// treshold, soglia errore
+// threshold, soglia errore
 const unsigned int th = 30;
 unsigned long duration;
 unsigned long input_pot;
@@ -37,7 +37,8 @@ int error = 0;
 unsigned int abs_err = 0;
 int last_pot = 0;
 
-void setup() {
+void setup()
+{
     POT_MIN = analogRead(A1);
     
     // cambiare costante per aumentare o diminuire apertura,
@@ -53,7 +54,8 @@ void setup() {
 }
 
 inline
-unsigned int map_pot(unsigned int input_pot) {
+unsigned int map_pot(unsigned int input_pot)
+{
     input_pot = map(input_pot, POT_MIN, POT_MAX, MAP_POT_MIN, MAP_POT_MAX);
     if (input_pot < MAP_POT_MIN) {
       return MAP_POT_MIN;
@@ -64,7 +66,8 @@ unsigned int map_pot(unsigned int input_pot) {
 }
 
 inline
-unsigned int map_duration(unsigned int duration) {
+unsigned int map_duration(unsigned int duration)
+{
     if (duration < 25) {
       return MAP_POT_MIN;
     } else if (duration > 475) {
@@ -74,17 +77,18 @@ unsigned int map_duration(unsigned int duration) {
 }
 
 inline
-int map_fix(int err) { 
-    err = map(error, -600, 600, -127, 110);
-    if (err < -127) {
+int map_fix(int err)
+{ 
+    fix = map(err, -600, 600, -127, 110);
+    if (fix < -127) {
         return -127;
-    } else if (err > 110) {
+    } else if (fix > 110) {
         return 110;
     }
     return err;
 }
 
-bool update_status()
+bool is_safe()
 {
     input_pot = analogRead(A1);
     input_pot = map_pot(input_pot);
@@ -100,14 +104,16 @@ bool update_status()
 }
 
 inline
-void check_limits() {
+void check_limits()
+{
     if (abs(input_pot - MAP_POT_MIN) < th) {
       roboclaw.ForwardM1(robo_addr, 0);
     }
 }
 
-void loop() {
-    while (!update_status()) {
+void loop()
+{
+    while (!is_safe()) {
         int fix = map_fix(error);
 
         last_pot = [fix]() {
@@ -124,12 +130,12 @@ void loop() {
 
         Serial.print("last_pot: ");
         Serial.print(last_pot);
-        Serial.print("  errore: ");
-        Serial.print(err);
-        Serial.print("target: ");
+        Serial.print(" fix: ");
+        Serial.print(fix);
+        Serial.print(" target: ");
         Serial.print(duration);
-        Serial.print("sensor: ");
-         Serial.println(input_pot);
+        Serial.print(" sensor: ");
+        Serial.println(input_pot);
     }
     check_limits();
 }
